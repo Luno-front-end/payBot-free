@@ -1,0 +1,27 @@
+{
+  "name": "paybot-free",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Luno-front-end/payBot-free.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Luno-front-end/payBot-free/issues"
+  },
+  "homepage": "https://github.com/Luno-front-end/payBot-free#readme",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "node-telegram-bot-api": "^0.60.0",
+    "nodemon": "^2.0.20",
+    "telegraf": "^4.11.2",
+    "telegram-keyboard": "^2.3.2"
+  }
+}
