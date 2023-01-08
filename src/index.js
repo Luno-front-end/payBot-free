@@ -65,7 +65,6 @@ bot.on("callback_query", async (query) => {
           reply_markup: keyboardBuy,
         });
         requestData.amount = 5000;
-
         requestData.order_id = generateId;
         requestData.order_desc = text.priceDays;
         // requestData.amount = optionFn();
@@ -73,15 +72,15 @@ bot.on("callback_query", async (query) => {
     }
     if (name === "btn_2") {
       await bot.answerCallbackQuery(id);
+      requestData.amount = 25000;
+      requestData.order_id = generateId;
+      requestData.order_desc = text.priceMonth;
       setTimeout(() => {
         bot.editMessageText(text.priceMonth, {
           chat_id,
           message_id: message_id,
           reply_markup: keyboardBuy,
         });
-        requestData.amount = 25000;
-        requestData.order_id = generateId;
-        requestData.order_desc = text.priceMonth;
       }, 300);
     }
     if (name === "btn_3") {
@@ -89,9 +88,7 @@ bot.on("callback_query", async (query) => {
 
       setTimeout(() => {
         pay();
-        requestData.amount = "";
-        requestData.order_id = "";
-        requestData.order_desc = "";
+
         // bot.sendMessage(chat_id, text.done);
       }, 300);
     }
@@ -102,9 +99,6 @@ bot.on("callback_query", async (query) => {
         message_id: message_id,
         reply_markup: keyboardDefaultReplay,
       });
-      requestData.amount = "";
-      requestData.order_id = "";
-      requestData.order_desc = "";
     }
     if (name === "btn_5") {
       await bot.answerCallbackQuery(id);
