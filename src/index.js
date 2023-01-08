@@ -23,9 +23,9 @@ const bot = new TelegramBot(token, { polling: true });
 const pay = () => {
   fondy
     .Checkout(requestData)
-    .then((data) => {
+    .then(async (data) => {
       console.log(data.checkout_url);
-      opn(data.checkout_url);
+      await opn(data.checkout_url);
     })
     .catch((error) => {
       console.log(error);
