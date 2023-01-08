@@ -33,5 +33,15 @@ const btnText = {
   back: "Назад",
   buySubscription: "☑️ КУПИТИ ПІДПИСКУ",
 };
+const buySubs = {
+  days: 5000,
+  month: 25000,
+};
 
-module.exports = { text, btnText };
+const requestData = {
+  order_id: "",
+  order_desc: "",
+  currency: "USD",
+  amount: "",
+};
+module.exports = { text, btnText, buySubs, requestData };

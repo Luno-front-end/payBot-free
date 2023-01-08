@@ -19,9 +19,12 @@
   },
   "homepage": "https://github.com/Luno-front-end/payBot-free#readme",
   "dependencies": {
+    "better-opn": "^3.0.2",
     "cloudipsp-node-js-sdk": "^1.0.5",
     "dotenv": "^16.0.3",
     "node-telegram-bot-api": "^0.60.0",
-    "nodemon": "^2.0.20"
+    "nodemon": "^2.0.20",
+    "opn": "^6.0.0",
+    "uuid": "^9.0.0"
   }
 }
