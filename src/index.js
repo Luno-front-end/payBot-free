@@ -1,85 +1,119 @@
-const { Telegraf, Markup } = require("telegraf");
-const { Keyboard, Key } = require("telegram-keyboard");
+const TelegramBot = require("node-telegram-bot-api");
 
-const text = require("./constants");
+const { text, btnText } = require("./constants");
 require("dotenv").config();
+const {
+  keyboardDefault,
+  keyboardDefaultReplay,
+  keyboardBuy,
+  keyboardGeneral,
+  subscription,
+} = require("./components/buttons");
+const token = process.env.BOT_TOKEN;
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
-let massageId = "";
+const bot = new TelegramBot(token, { polling: true });
 
-const keyboard = Keyboard.make([
-  [
-    Key.callback("Beginner 50$ (1 month)", "btn_1"),
-    Key.callback("Advanced 250$ (6 months)", "btn_2"),
-  ],
-]);
-
-const keyboardMenu = Keyboard.reply([["💵 Тарифи", "⌛️ Моя підписка"]]);
-const subKeyboardMenu = Keyboard.make([
-  [Key.callback("Оплатити", "btn_3")],
-  [Key.callback("Назад", "btn_4")],
-]);
-
-bot.start(async (ctx) => {
+bot.onText(/\/start/, async (msg) => {
   try {
-    await ctx.replyWithPhoto(
-      {
-        source: "src/img/prev.jpg",
-      },
-      {
-        caption: `Mind & Body Online Health Club 
-Вітаю тебе у нашій команді 💪🏻
+    pic = "src/img/prev.jpg";
+    chat_id = msg.chat.id;
+    await bot.sendPhoto(chat_id, pic, {
+      caption: text.caption,
+      reply_markup: keyboardGeneral,
+    });
 
-Правила клубу 🚩
-( там файл будет)`,
-      }
-    );
-    // await ctx.reply("текст заглушка", keyboardMenu);
-    const { message_id } = await ctx.reply(text[4], keyboard.inline());
-    massageId = message_id;
+    await bot.sendMessage(chat_id, text.choice, { ...keyboardDefault });
   } catch (error) {
     console.error(error);
   }
 });
 
-const activeButton = async (name, onText) => {
-  bot.action(name, async (ctx) => {
-    try {
-      console.log(ctx.inlineQuery);
-      await ctx.answerCbQuery();
-      if (name === "btn_1" || name === "btn_2") {
-        await ctx.telegram.editMessageText(
-          ctx.chat.id,
-          massageId,
-          0,
-          onText,
-          subKeyboardMenu.inline()
-        );
-        return;
-      }
-      if (name === "btn_4") {
-        await ctx.telegram.editMessageText(
-          ctx.chat.id,
-          massageId,
-          0,
-          onText,
-          keyboard.inline()
-        );
-        return;
-      }
-      await ctx.reply(onText);
-    } catch (e) {
-      console.error(e);
+bot.on("callback_query", async (query) => {
+  try {
+    const name = query.data;
+    const Id = query.id;
+    const chat_id = query.message.chat.id;
+    const message_id = query.message.message_id;
+
+    if (name === "btn_1") {
+      await bot.answerCallbackQuery(Id);
+      bot.editMessageText(text.priceDays, {
+        chat_id,
+        message_id: message_id,
+        reply_markup: keyboardBuy,
+      });
     }
-  });
-};
-activeButton("btn_1", text[0]);
-activeButton("btn_2", text[1]);
-activeButton("btn_3", text[3]);
-activeButton("btn_4", text[4]);
+    if (name === "btn_2") {
+      await bot.answerCallbackQuery(Id);
+      bot.editMessageText(text.priceMonth, {
+        chat_id,
+        message_id: message_id,
+        reply_markup: keyboardBuy,
+      });
+    }
+    if (name === "btn_3") {
+      await bot.answerCallbackQuery(Id);
+      bot.sendMessage(chat_id, text.done);
+    }
+    if (name === "btn_4") {
+      await bot.answerCallbackQuery(Id);
+      bot.editMessageText(text.choice, {
+        chat_id,
+        message_id: message_id,
+        reply_markup: keyboardDefaultReplay,
+      });
+    }
+    if (name === "btn_5") {
+      await bot.answerCallbackQuery(Id);
+      bot.editMessageText(text.choice, {
+        chat_id,
+        message_id: message_id,
+        reply_markup: keyboardDefaultReplay,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+  }
+});
+bot.on("message", async (msg) => {
+  try {
+    const msgText = msg.text;
+    const chatId = msg.chat.id;
+    // const Id = query.id;
+    // const chat_id = query.message.chat.id;
+    // const message_id = query.message.message_id;
 
-bot.launch();
+    // if (name === "btn_1") {
+    //   await bot.answerCallbackQuery(Id);
+    //   bot.editMessageText(text.priceDays, {
+    //     chat_id,
+    //     message_id: message_id,
+    //     reply_markup: keyboardBuy,
+    //   });
+    // }
 
-// Enable graceful stop
-process.once("SIGINT", () => bot.stop("SIGINT"));
-process.once("SIGTERM", () => bot.stop("SIGTERM"));
+    switch (msgText) {
+      case btnText.tariff:
+        bot.sendMessage(chatId, text.choice, { ...keyboardDefault });
+
+        break;
+      case btnText.mySubscription:
+        bot.sendMessage(chatId, text.mySubscription, { ...subscription });
+        break;
+
+      default:
+        break;
+    }
+    // console.log(query);
+    // if (name === "btn_1") {
+    //   await bot.answerCallbackQuery(Id);
+    //   bot.editMessageText(text.priceDays, {
+    //     chat_id,
+    //     message_id: message_id,
+    //     reply_markup: keyboardBuy,
+    //   });
+    // }
+  } catch (error) {
+    console.error(error);
+  }
+});
