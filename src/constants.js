@@ -44,4 +44,5 @@ const requestData = {
   currency: "USD",
   amount: "",
 };
+
 module.exports = { text, btnText, buySubs, requestData };

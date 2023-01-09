@@ -1,4 +1,4 @@
-const { text, btnText } = require("../constants");
+const { text, btnText, payUrl } = require("../constants");
 
 const keyboardDefault = {
   reply_markup: {
@@ -22,9 +22,14 @@ const keyboardDefaultReplay = {
 };
 
 const keyboardBuy = {
-  resize_keyboard: true,
   inline_keyboard: [
-    [{ text: btnText.buy, callback_data: "btn_3" }],
+    [
+      {
+        text: btnText.buy,
+        callback_data: "btn_3",
+        url: "https://google.com",
+      },
+    ],
     [{ text: btnText.back, callback_data: "btn_4" }],
   ],
 };

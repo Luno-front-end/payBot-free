@@ -20,12 +20,17 @@ const { fondy } = require("./components/paymentsFondy");
 const token = process.env.BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
+let payLink = "";
+
 const pay = () => {
   fondy
     .Checkout(requestData)
     .then(async (data) => {
       console.log(data.checkout_url);
-      await opn(data.checkout_url);
+      // payUrl = ;
+      payLink = data.checkout_url;
+
+      return payLink;
     })
     .catch((error) => {
       console.log(error);
@@ -48,6 +53,8 @@ bot.onText(/\/start/, async (msg) => {
 });
 
 bot.on("callback_query", async (query) => {
+  console.log("Виклик");
+
   try {
     const name = query.data;
     const id = query.id;
@@ -57,41 +64,73 @@ bot.on("callback_query", async (query) => {
     const generateId = uuidv4();
 
     if (name === "btn_1") {
+      requestData.amount = 5000;
+      requestData.order_id = generateId;
+      requestData.order_desc = text.priceDays;
+      pay();
       await bot.answerCallbackQuery(id);
       setTimeout(() => {
         bot.editMessageText(text.priceDays, {
           chat_id,
           message_id: message_id,
-          reply_markup: keyboardBuy,
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: btnText.buy,
+                  callback_data: "btn_3",
+                  url: payLink,
+                },
+              ],
+              [{ text: btnText.back, callback_data: "btn_4" }],
+            ],
+          },
         });
-        requestData.amount = 5000;
-        requestData.order_id = generateId;
-        requestData.order_desc = text.priceDays;
+
         // requestData.amount = optionFn();
       }, 300);
+      // if (requestData.order_desc !== "") {
+      // }
     }
+    // console.log(keyboardBuy.inline_keyboard[0]);
     if (name === "btn_2") {
       await bot.answerCallbackQuery(id);
       requestData.amount = 25000;
       requestData.order_id = generateId;
       requestData.order_desc = text.priceMonth;
+      pay();
+
       setTimeout(() => {
         bot.editMessageText(text.priceMonth, {
           chat_id,
           message_id: message_id,
-          reply_markup: keyboardBuy,
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: btnText.buy,
+                  callback_data: "btn_3",
+                  url: payLink,
+                },
+              ],
+              [{ text: btnText.back, callback_data: "btn_4" }],
+            ],
+          },
         });
       }, 300);
     }
-    if (name === "btn_3") {
-      await bot.answerCallbackQuery(id);
 
-      setTimeout(() => {
-        pay();
+    console.log(keyboardBuy.inline_keyboard[0]);
+    // if (name === "btn_3") {
+    //   await bot.answerCallbackQuery(id);
 
-        // bot.sendMessage(chat_id, text.done);
-      }, 300);
-    }
+    //   // setTimeout(() => {
+
+    //   // console.log(keyboardBuy.inline_keyboard[0]);
+
+    //   // bot.sendMessage(chat_id, text.done);
+    //   // }, 300);
+    // }
     if (name === "btn_4") {
       await bot.answerCallbackQuery(id);
       bot.editMessageText(text.choice, {
