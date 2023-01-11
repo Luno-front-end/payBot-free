@@ -11,7 +11,6 @@ require("dotenv").config();
 const {
   keyboardDefault,
   keyboardDefaultReplay,
-  keyboardBuy,
   keyboardGeneral,
   subscription,
 } = require("./components/buttons");
@@ -27,8 +26,8 @@ const pay = () => {
     .Checkout(requestData)
     .then(async (data) => {
       console.log(data.checkout_url);
-      // payUrl = ;
       payLink = data.checkout_url;
+      console.log(data);
 
       return payLink;
     })
@@ -92,7 +91,6 @@ bot.on("callback_query", async (query) => {
       // if (requestData.order_desc !== "") {
       // }
     }
-    // console.log(keyboardBuy.inline_keyboard[0]);
     if (name === "btn_2") {
       await bot.answerCallbackQuery(id);
       requestData.amount = 25000;
@@ -120,13 +118,10 @@ bot.on("callback_query", async (query) => {
       }, 300);
     }
 
-    console.log(keyboardBuy.inline_keyboard[0]);
     // if (name === "btn_3") {
     //   await bot.answerCallbackQuery(id);
 
     //   // setTimeout(() => {
-
-    //   // console.log(keyboardBuy.inline_keyboard[0]);
 
     //   // bot.sendMessage(chat_id, text.done);
     //   // }, 300);
@@ -163,6 +158,9 @@ bot.on("message", async (msg) => {
         break;
       case btnText.mySubscription:
         bot.sendMessage(chatId, text.mySubscription, { ...subscription });
+        break;
+      case btnText.clubRules:
+        bot.sendMessage(chatId, text.clubRules);
         break;
 
       default:

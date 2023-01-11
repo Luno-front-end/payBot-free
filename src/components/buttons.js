@@ -27,7 +27,6 @@ const keyboardBuy = {
       {
         text: btnText.buy,
         callback_data: "btn_3",
-        url: "https://google.com",
       },
     ],
     [{ text: btnText.back, callback_data: "btn_4" }],
@@ -36,11 +35,13 @@ const keyboardBuy = {
 
 const keyboardGeneral = {
   resize_keyboard: true,
+
   keyboard: [
     [
       { text: btnText.tariff, callback_data: "btn_g1" },
       { text: btnText.mySubscription, callback_data: "btn_g2" },
     ],
+    [{ text: btnText.clubRules, callback_data: "btn_6" }],
   ],
 };
 const subscription = {
