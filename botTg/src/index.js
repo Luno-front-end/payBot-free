@@ -68,6 +68,8 @@ bot.on("callback_query", async (query) => {
     const user = await getOneUsers(userId);
 
     if (nameBtn === "btn_1") {
+      await bot.answerCallbackQuery(id);
+
       requestData.amount = 5000;
       requestData.order_id = generateId;
       requestData.order_desc = text.priceDays;
@@ -86,27 +88,29 @@ bot.on("callback_query", async (query) => {
         );
       }
 
-      await bot.answerCallbackQuery(id);
-      bot.editMessageText(text.priceDays, {
-        chat_id,
-        message_id: message_id,
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: btnText.buy,
-                callback_data: "btn_3",
-                url: payLink,
-              },
+      setTimeout(() => {
+        bot.editMessageText(text.priceDays, {
+          chat_id,
+          message_id: message_id,
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: btnText.buy,
+                  callback_data: "btn_3",
+                  url: payLink,
+                },
+              ],
+              [{ text: btnText.back, callback_data: "btn_4" }],
             ],
-            [{ text: btnText.back, callback_data: "btn_4" }],
-          ],
-        },
-      });
+          },
+        });
+      }, 500);
     }
 
     if (nameBtn === "btn_2") {
       await bot.answerCallbackQuery(id);
+
       requestData.amount = 25000;
       requestData.order_id = generateId;
       requestData.order_desc = text.priceMonth;
@@ -125,23 +129,25 @@ bot.on("callback_query", async (query) => {
         );
       }
 
-      bot.editMessageText(text.priceMonth, {
-        chat_id,
-        message_id: message_id,
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: btnText.buy,
-                callback_data: "btn_3",
+      setTimeout(() => {
+        bot.editMessageText(text.priceMonth, {
+          chat_id,
+          message_id: message_id,
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: btnText.buy,
+                  callback_data: "btn_3",
 
-                url: payLink,
-              },
+                  url: payLink,
+                },
+              ],
+              [{ text: btnText.back, callback_data: "btn_4" }],
             ],
-            [{ text: btnText.back, callback_data: "btn_4" }],
-          ],
-        },
-      });
+          },
+        });
+      }, 500);
     }
 
     // if (nameBtn === "btn_3") {

@@ -12,9 +12,7 @@ const connectDb = () => {
         console.log("Connection error", err);
         throw err;
       }
-      //   console.log(client);
       console.log("Connected!");
-      // client.close();
     }
   );
   return mongoose.connection;
@@ -31,7 +29,6 @@ const createUser = () => {
       console.log(err);
       throw err;
     }
-    // return err ? console.error(err) : console.log(post);
   });
   connectDb().on("error", console.log).on("disconnect", connectDb);
 };

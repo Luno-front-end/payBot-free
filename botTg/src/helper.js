@@ -12,7 +12,6 @@ const dateSubs = () => {
 };
 
 const priceConverter = (pay) => {
-  console.log(pay);
   if (pay === 5000) return 50;
   if (pay === 25000) return 250;
 };
