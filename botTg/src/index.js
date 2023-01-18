@@ -1,38 +1,27 @@
 const TelegramBot = require("node-telegram-bot-api");
 const { v1: uuidv1, v4: uuidv4 } = require("uuid");
 
-const { text, btnText, requestData } = require("./constants");
+const { text, btnText } = require("./constants");
+const { requestData, resData, paymentInfo } = require("./payment/dataReq");
 const {
   keyboardDefault,
   keyboardDefaultReplay,
   keyboardGeneral,
   subscription,
 } = require("./components/buttons");
-const { createUser, updateUser, getOneUsers } = require("./mongoDb/index");
-const { fondy } = require("./components/paymentsFondy");
+const { createUser, updateUser, getOneUserById } = require("./mongoDb/index");
+const { reqFondy, resPayment } = require("./payment/paymentsFondy");
 const { addInfoUserDB, dateSubs, priceConverter } = require("./helper");
+const { createShaPost, createShaRes } = require("./payment/sha");
+const server = require("./server");
 
 require("dotenv").config();
+server();
 
 const token = process.env.BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
-let payLink = "";
-
-const payFn = () => {
-  fondy
-    .Checkout(requestData)
-    .then(async (data) => {
-      // console.log(data.checkout_url);
-      payLink = data.checkout_url;
-      // console.log(data);
-
-      return payLink;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
+// let payLink = "";
 
 bot.onText(/\/start/, async (msg) => {
   try {
@@ -46,7 +35,6 @@ bot.onText(/\/start/, async (msg) => {
     await bot.sendMessage(chat_id, text.choice, { ...keyboardDefault });
   } catch (error) {
     console.error(error);
-    throw error;
   }
 });
 
@@ -65,17 +53,31 @@ bot.on("callback_query", async (query) => {
     const username = query.from.username;
 
     const generateId = uuidv4();
-    const user = await getOneUsers(userId);
+    const user = await getOneUserById(userId);
 
     if (nameBtn === "btn_1") {
       await bot.answerCallbackQuery(id);
 
-      requestData.amount = 5000;
-      requestData.order_id = generateId;
-      requestData.order_desc = text.priceDays;
+      requestData.request.amount = 5000;
+      requestData.request.order_id = generateId;
+      requestData.request.order_desc = text.priceDays;
+      requestData.request.signature = createShaPost();
 
-      payFn();
-      addInfoUserDB(userId, userFirstName, userLastName, username, nameBtn);
+      await reqFondy().then((res) => {
+        paymentInfo.pay_id = res.response.payment_id;
+        paymentInfo.pay_link = res.response.checkout_url;
+      });
+
+      addInfoUserDB(
+        userId,
+        userFirstName,
+        userLastName,
+        username,
+        nameBtn,
+        generateId,
+        paymentInfo.pay_id,
+        requestData.request.amount
+      );
 
       if (user.length === 0) {
         createUser();
@@ -84,9 +86,14 @@ bot.on("callback_query", async (query) => {
           userId,
           priceConverter(requestData.amount),
           dateSubs,
-          nameBtn
+          nameBtn,
+          generateId,
+          paymentInfo.pay_id
         );
       }
+      // console.log("paymentInfo.pay_idBOT", paymentInfo.pay_id);
+      resData.request.order_id = generateId;
+      resData.request.signature = createShaRes();
 
       setTimeout(() => {
         bot.editMessageText(text.priceDays, {
@@ -98,7 +105,7 @@ bot.on("callback_query", async (query) => {
                 {
                   text: btnText.buy,
                   callback_data: "btn_3",
-                  url: payLink,
+                  url: paymentInfo.pay_link,
                 },
               ],
               [{ text: btnText.back, callback_data: "btn_4" }],
@@ -106,17 +113,42 @@ bot.on("callback_query", async (query) => {
           },
         });
       }, 500);
+      // setInterval(() => {
+      //   resPayment();
+      // }, 25000);
+
+      // function timer(flag) {
+      //     var intervalId = setInterval (function(){...}
+      //     if (flag == 'false') {
+      //                 clearInterval(intervalId);
+      //              }
+      // }
     }
 
     if (nameBtn === "btn_2") {
       await bot.answerCallbackQuery(id);
 
-      requestData.amount = 25000;
-      requestData.order_id = generateId;
-      requestData.order_desc = text.priceMonth;
+      requestData.request.amount = 25000;
+      requestData.request.order_id = generateId;
+      requestData.request.order_desc = text.priceDays;
+      requestData.request.signature = createShaPost();
 
-      payFn();
-      addInfoUserDB(userId, userFirstName, userLastName, username, nameBtn);
+      await reqFondy().then((res) => {
+        paymentInfo.pay_id = res.response.payment_id;
+        paymentInfo.pay_link = res.response.checkout_url;
+      });
+
+      // createPay();
+      addInfoUserDB(
+        userId,
+        userFirstName,
+        userLastName,
+        username,
+        nameBtn,
+        generateId,
+        paymentInfo.pay_id,
+        requestData.request.amount
+      );
 
       if (user.length === 0) {
         createUser();
@@ -125,9 +157,14 @@ bot.on("callback_query", async (query) => {
           userId,
           priceConverter(requestData.amount),
           dateSubs,
-          nameBtn
+          nameBtn,
+          generateId,
+          paymentInfo.pay_id
         );
       }
+
+      resData.request.order_id = generateId;
+      resData.request.signature = createShaRes();
 
       setTimeout(() => {
         bot.editMessageText(text.priceMonth, {
@@ -140,7 +177,7 @@ bot.on("callback_query", async (query) => {
                   text: btnText.buy,
                   callback_data: "btn_3",
 
-                  url: payLink,
+                  url: paymentInfo.pay_link,
                 },
               ],
               [{ text: btnText.back, callback_data: "btn_4" }],
@@ -172,7 +209,6 @@ bot.on("callback_query", async (query) => {
     }
   } catch (error) {
     console.error(error);
-    throw error;
   }
 });
 

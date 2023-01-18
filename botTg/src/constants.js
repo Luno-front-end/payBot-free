@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const text = {
   priceDays: `Тариф: Standart
 Вартість: 50.00 💵USD
@@ -43,11 +45,4 @@ const btnText = {
   clubRules: `Правила клубу 🚩`,
 };
 
-const requestData = {
-  order_id: "",
-  order_desc: "",
-  currency: "USD",
-  amount: "",
-};
-
-module.exports = { text, btnText, requestData };
+module.exports = { text, btnText };

@@ -8,8 +8,16 @@ const subsUsers = new Schema({
   user_id: Number,
   pay: Number,
   subscribe: String,
+  order_id: String,
+  payment_id: Number,
   datePay: String,
   dateEnd: String,
+  payment: {
+    sender_email: String,
+    order_id: String,
+    order_status: String,
+    rectoken: String,
+  },
 });
 
 module.exports = subsUsers;
