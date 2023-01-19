@@ -41,7 +41,10 @@ const keyboardGeneral = {
       { text: btnText.tariff, callback_data: "btn_g1" },
       { text: btnText.mySubscription, callback_data: "btn_g2" },
     ],
-    [{ text: btnText.clubRules, callback_data: "btn_6" }],
+    [
+      { text: btnText.clubRules, callback_data: "btn_6" },
+      { text: btnText.descriptionClub, callback_data: "btn_g2" },
+    ],
   ],
 };
 const subscription = {

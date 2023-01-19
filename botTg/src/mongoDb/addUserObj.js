@@ -7,13 +7,14 @@ const userInfo = {
   subscribe: String,
   order_id: String,
   payment_id: Number,
-  datePay: String,
-  dateEnd: String,
+  title: String,
   payment: {
     sender_email: null,
     order_id: null,
     order_status: null,
     rectoken: null,
+    datePay: null,
+    dateEnd: null,
   },
 };
 

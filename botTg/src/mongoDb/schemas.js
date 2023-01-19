@@ -1,5 +1,4 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+const { Schema, model } = require("mongoose");
 
 const subsUsers = new Schema({
   first_name: String,
@@ -10,14 +9,15 @@ const subsUsers = new Schema({
   subscribe: String,
   order_id: String,
   payment_id: Number,
-  datePay: String,
-  dateEnd: String,
+  title: String,
   payment: {
     sender_email: String,
     order_id: String,
     order_status: String,
     rectoken: String,
+    datePay: String,
+    dateEnd: String,
   },
 });
 
-module.exports = subsUsers;
+module.exports = model("subsUsers", subsUsers);

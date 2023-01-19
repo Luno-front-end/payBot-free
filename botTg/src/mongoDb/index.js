@@ -1,30 +1,50 @@
 const mongoose = require("mongoose");
 
-const subsUsersSchema = require("./schemas");
+const SubsUsersSchema = require("./schemas");
 const userInfo = require("./addUserObj");
+const { dateSubs } = require("../helper");
+
+require("dotenv").config();
 
 const connectDb = () => {
-  mongoose.connect(
-    "mongodb://127.0.0.1:27017/subsUsers",
-    { useNewUrlParser: true },
-    (err, client) => {
-      if (err) {
-        console.log("Connection error", err);
+  try {
+    mongoose.connect(
+      process.env.URL_CONNECT,
+      {
+        useNewUrlParser: true,
+      },
+      (err, client) => {
+        if (err) {
+          console.log("Connection error", err);
+        }
+        // console.log("Connected!");
       }
-      // console.log("Connected!");
-    }
-  );
+    );
+  } catch (error) {
+    console.log(error);
+  }
+
+  // mongoose.connect(
+  //   "mongodb://127.0.0.1:27017/subsUsers",
+  //   { useNewUrlParser: true },
+  // (err, client) => {
+  //   if (err) {
+  //     console.log("Connection error", err);
+  //   }
+  //   // console.log("Connected!");
+  // }
+  // );
   return mongoose.connection;
 };
 
-const subsUsersPost = mongoose.model("subsUsers", subsUsersSchema);
+// const subsUsersPost = mongoose.model("subsUsers", subsUsersSchema);
 
 const createUser = () => {
   connectDb();
   console.log("create user");
 
-  const addUsersSubs = new subsUsersPost(userInfo);
-  addUsersSubs.save((err, post) => {
+  const addUsers = new SubsUsersSchema(userInfo);
+  addUsers.save((err, post) => {
     // return err ? console.error(err) : console.log(post);
     if (err) {
       console.log(err);
@@ -32,17 +52,15 @@ const createUser = () => {
   });
   connectDb().on("error", console.log).on("disconnect", connectDb);
 };
-const updateUser = (userId, pay, date, nameBtn, order_id, payment_id) => {
+const updateUser = (userId, pay, nameBtn, order_id, payment_id) => {
   connectDb();
   console.log("update user");
-  subsUsersPost.updateOne(
+  SubsUsersSchema.updateOne(
     { user_id: userId },
     {
       $set: {
         pay: pay,
         subscribe: nameBtn === "btn_1" ? "1 month" : "6 month",
-        datePay: date().datePay,
-        dateEnd: nameBtn === "btn_1" ? date().dateEndOne : date().dateEndTwo,
         order_id,
         payment_id,
       },
@@ -61,23 +79,22 @@ const updateUser = (userId, pay, date, nameBtn, order_id, payment_id) => {
 //   rectoken: "",
 //   order_status: "",
 
-const updateUserForPay = async (pay_id, mail, orderId, status, rectoken) => {
+const updateUserForPay = async (
+  pay_id,
+  mail,
+  orderId,
+  status,
+  rectoken,
+  timePay,
+  amount
+) => {
   try {
     connectDb();
-    console.log("pay_id", pay_id);
     console.log("update user pay");
-    // const user = await subsUsersPost.find(
-    //   { payment_id: pay_id },
-    //   (err, result) => {
-    //     if (err) {
-    //       console.log("Unable update user: ", err);
-    //     }
-    //   }
-    // );
     const user = await getOneUsersByPayId(pay_id);
     console.log(user);
     pay_id === user[0].payment_id
-      ? subsUsersPost.updateOne(
+      ? SubsUsersSchema.updateOne(
           { payment_id: pay_id },
           {
             $set: {
@@ -86,6 +103,11 @@ const updateUserForPay = async (pay_id, mail, orderId, status, rectoken) => {
                 order_id: orderId,
                 order_status: status,
                 rectoken: rectoken,
+                datePay: timePay,
+                dateEnd:
+                  amount === 5000
+                    ? dateSubs().dateEndOne
+                    : dateSubs().dateEndTwo,
               },
             },
           },
@@ -106,20 +128,20 @@ const updateUserForPay = async (pay_id, mail, orderId, status, rectoken) => {
 const getAllUsers = async () => {
   connectDb();
 
-  const allUsers = await subsUsersPost.find();
+  const allUsers = await SubsUsersSchema.find({});
   connectDb().on("error", console.log).on("disconnect", connectDb);
 
   return allUsers;
 };
 const getOneUsersByPayId = async (pay_id) => {
   connectDb();
-  const user = await subsUsersPost.find({ payment_id: pay_id });
+  const user = await SubsUsersSchema.find({ payment_id: pay_id });
   connectDb().on("error", console.log).on("disconnect", connectDb);
   return user;
 };
 const getOneUserById = async (user_id) => {
   connectDb();
-  const user = await subsUsersPost.find({ user_id: user_id });
+  const user = await SubsUsersSchema.find({ user_id: user_id });
   connectDb().on("error", console.log).on("disconnect", connectDb);
   return user;
 };

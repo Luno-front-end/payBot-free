@@ -1,7 +1,7 @@
 const TelegramBot = require("node-telegram-bot-api");
 const { v1: uuidv1, v4: uuidv4 } = require("uuid");
 
-const { text, btnText } = require("./constants");
+const { text, btnText, paymentTilte } = require("./constants");
 const { requestData, resData, paymentInfo } = require("./payment/dataReq");
 const {
   keyboardDefault,
@@ -9,9 +9,14 @@ const {
   keyboardGeneral,
   subscription,
 } = require("./components/buttons");
-const { createUser, updateUser, getOneUserById } = require("./mongoDb/index");
+const {
+  createUser,
+  updateUser,
+  getOneUserById,
+  getAllUsers,
+} = require("./mongoDb/index");
 const { reqFondy, resPayment } = require("./payment/paymentsFondy");
-const { addInfoUserDB, dateSubs, priceConverter } = require("./helper");
+const { addInfoUserDB, priceConverter, timePay } = require("./helper");
 const { createShaPost, createShaRes } = require("./payment/sha");
 const server = require("./server");
 
@@ -60,10 +65,11 @@ bot.on("callback_query", async (query) => {
 
       requestData.request.amount = 5000;
       requestData.request.order_id = generateId;
-      requestData.request.order_desc = text.priceDays;
+      requestData.request.order_desc = paymentTilte.titleStandart;
       requestData.request.signature = createShaPost();
 
       await reqFondy().then((res) => {
+        console.log(res);
         paymentInfo.pay_id = res.response.payment_id;
         paymentInfo.pay_link = res.response.checkout_url;
       });
@@ -76,7 +82,8 @@ bot.on("callback_query", async (query) => {
         nameBtn,
         generateId,
         paymentInfo.pay_id,
-        requestData.request.amount
+        requestData.request.amount,
+        paymentTilte.titleStandart
       );
 
       if (user.length === 0) {
@@ -85,7 +92,6 @@ bot.on("callback_query", async (query) => {
         updateUser(
           userId,
           priceConverter(requestData.amount),
-          dateSubs,
           nameBtn,
           generateId,
           paymentInfo.pay_id
@@ -130,7 +136,7 @@ bot.on("callback_query", async (query) => {
 
       requestData.request.amount = 25000;
       requestData.request.order_id = generateId;
-      requestData.request.order_desc = text.priceDays;
+      requestData.request.order_desc = paymentTilte.titleAdvanced;
       requestData.request.signature = createShaPost();
 
       await reqFondy().then((res) => {
@@ -147,7 +153,8 @@ bot.on("callback_query", async (query) => {
         nameBtn,
         generateId,
         paymentInfo.pay_id,
-        requestData.request.amount
+        requestData.request.amount,
+        paymentTilte.titleAdvanced
       );
 
       if (user.length === 0) {
@@ -156,7 +163,6 @@ bot.on("callback_query", async (query) => {
         updateUser(
           userId,
           priceConverter(requestData.amount),
-          dateSubs,
           nameBtn,
           generateId,
           paymentInfo.pay_id
@@ -166,8 +172,8 @@ bot.on("callback_query", async (query) => {
       resData.request.order_id = generateId;
       resData.request.signature = createShaRes();
 
-      setTimeout(() => {
-        bot.editMessageText(text.priceMonth, {
+      setTimeout(async () => {
+        await bot.editMessageText(text.priceMonth, {
           chat_id,
           message_id: message_id,
           reply_markup: {
@@ -217,6 +223,8 @@ bot.on("message", async (msg) => {
     const msgText = msg.text;
     const chatId = msg.chat.id;
 
+    console.log(chatId);
+
     switch (msgText) {
       case btnText.tariff:
         bot.sendMessage(chatId, text.choice, { ...keyboardDefault });
@@ -228,7 +236,9 @@ bot.on("message", async (msg) => {
       case btnText.clubRules:
         bot.sendMessage(chatId, text.clubRules);
         break;
-
+      case btnText.descriptionClub:
+        bot.sendMessage(chatId, text.descriptionClub);
+        break;
       default:
         break;
     }
@@ -236,6 +246,17 @@ bot.on("message", async (msg) => {
     console.error(error);
   }
 });
+
+// setInterval(async () => {
+//   const date = timePay();
+//   const users = await getAllUsers();
+//   console.log("object");
+//   users.forEach((user) => {
+//     if (user.payment.datePay === date) {
+//       bot.sendMessage(user.user_id, "Підписка була продовжена!🫡 🎉");
+//     }
+//   });
+// }, 30000);
 
 // const { Api, TelegramClient
 // } = require("telegram")

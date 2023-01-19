@@ -27,6 +27,7 @@
     "js-sha1": "^0.6.0",
     "moment": "^2.29.4",
     "mongoose": "^6.8.3",
+    "node-cron": "^3.0.2",
     "node-fetch": "^2.6.1",
     "node-telegram-bot-api": "^0.60.0",
     "nodemon": "^2.0.20",
