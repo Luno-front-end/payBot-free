@@ -13,10 +13,10 @@ body {
   color: red;
 }
 .head-list {
-  display: flex;
+  /* display: flex;
   justify-content: space-between;
   font-size: 20px;
-  font-weight: 600;
+  font-weight: 600; */
 }
 .head-item {
   /* display: flex; */

@@ -24,6 +24,7 @@
     "dotenv": "^16.0.3",
     "ejs": "^3.1.8",
     "express": "^4.18.2",
+    "express-handlebars": "^6.0.6",
     "js-sha1": "^0.6.0",
     "moment": "^2.29.4",
     "mongoose": "^6.8.3",
@@ -31,6 +32,7 @@
     "node-fetch": "^2.6.1",
     "node-telegram-bot-api": "^0.60.0",
     "nodemon": "^2.0.20",
+    "serverless-http": "^3.1.1",
     "telegram": "^2.15.5",
     "uuid": "^9.0.0"
   }

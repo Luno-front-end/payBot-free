@@ -1,6 +1,7 @@
 const moment = require("moment");
 
 const userInfo = require("./mongoDb/addUserObj");
+const { text } = require("./constants");
 
 const dateSubs = () => {
   const oneM = moment().add(1, "month").calendar();
@@ -42,15 +43,13 @@ const addInfoUserDB = (
   userInfo.username = userName;
   userInfo.user_id = userId;
   userInfo.pay = priceConverter(ammount);
-  subscribe === "btn_1"
-    ? (userInfo.subscribe = "1 month")
-    : (userInfo.subscribe = "6 month");
+  subscribe === "btn_1" ? (userInfo.subscribe = 1) : (userInfo.subscribe = 6);
   userInfo.order_id = order_id;
   // userInfo.datePay = dateSubs().datePay;
   // userInfo.dateEnd =
   // subscribe === "btn_1" ? dateSubs().dateEndOne : dateSubs().dateEndTwo;
   userInfo.payment_id = payId;
-  userInfo.title = title;
+  userInfo.order_desc = title;
 };
 
 const paymentStatus = (mail, orderId, status, rectoken) => {
@@ -138,6 +137,22 @@ const timeEditPay = (res) => {
 
 //   return `${month}/${date}/${yearh}`;
 // };
+
+const acceptedMySubscription = (subsUser) => {
+  console.log(subsUser);
+  if (!subsUser[0]?.payment.order_id) {
+    return text.mySubscription;
+  } else {
+    return `⌛️ У вас підписка на ${subsUser[0].subscribe} місяць/мсяців.
+Підписалися: ${subsUser[0].payment.datePay} 
+Дата закінчення або дата продовження: ${subsUser[0].payment.dateEnd}
+
+Зараз ви можете тільки зупини підписку,
+натиснувши кнопку "Припинити оплачувати, та відписатися".
+Підписка видалиться, а на слідуючий місяць списання не відбудеться. 🥲`;
+  }
+};
+
 module.exports = {
   addInfoUserDB,
   dateSubs,
@@ -145,4 +160,5 @@ module.exports = {
   paymentStatus,
   timePay,
   timeEditPay,
+  acceptedMySubscription,
 };

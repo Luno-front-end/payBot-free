@@ -1,0 +1,63 @@
+<div class="container">
+  <div class="box-title">
+    <h1 class="title">Інформація про підписників</h1>
+  </div>
+  <div>
+
+    {{#if allUsers.length}}
+      <ul class="head-list">
+
+        {{#each allUsers}}
+          <li class="head-item">Імʼя: {{first_name}}</li>
+          <li class="head-item">Фамілія: {{last_name}}</li>
+          <li class="head-item">Нікнейм: {{username}}</li>
+          <li class="head-item">Пошта: {{payment.sender_email}}</li>
+          <li class="head-item">Оплачено: {{pay}}</li>
+          <li class="head-item">Яка підписка: {{order_desc}}</li>
+          <li class="head-item">Статус оплати: {{order_status}}</li>
+          <li class="head-item">Id замовлення: {{order_id}}</li>
+          <li class="head-item">Дата купівлі підписки: {{payment.datePay}}</li>
+          <li class="head-item">Дата закінчення підписки:
+            {{payment.dateEnd}}</li>
+        {{/each}}
+      </ul>
+    {{else}}
+      <p>Немає нічого</p>
+    {{/if}}
+
+    <ul class="user-list">
+      <!-- <li class="user-item">
+                <p class="header">Імʼя: <span class="value"><%= first_name %></span></p>
+              </li>
+              <li class="user-item">
+                <p class="header">Фамілія: <span class="value"><%= last_name %></span></p>
+              </li>
+              <li class="user-item">
+                <p class="header">Нікнейм в телеграмі: <span class="value"><%= username %></span></p>
+              </li>
+              <li class="user-item">
+                <p class="header">Пошта: <span class="value"><%= payment.sender_email %></span></p>
+              </li>
+              <li class="user-item">
+                <p class="header">Оплачено: <span class="value"><%= pay %></span></p>
+              </li>
+              <li class="user-item">
+                <p class="header">Яка підписка: <span class="value"><%= title %></span></p>
+              </li>
+              <li class="user-item">
+                <p class="header">Статус оплати: <span class="<%= payment.order_status === "approved" ? "value-ok" : "value-err" %>"> 
+                  <%= payment.order_status === "approved" ? "Оплачено" : "Не оплачено" %> </span> </p>
+              </li>
+              <li class="user-item">
+                <p class="header">Id замовлення: <span class="value"><%= order_id %></span></p>
+              </li>
+              <li class="user-item">
+                <p class="header">Дата купівлі підписки: <span class="value"><%= payment.datePay %></span></p>
+              </li>
+              <li class="user-item">
+                <p class="header">Дата закінчення підписки: <span class="value"><%= payment.dateEnd %></span></p>
+                
+              </li> -->
+    </ul>
+  </div>
+</div>

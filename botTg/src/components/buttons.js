@@ -1,4 +1,5 @@
 const { text, btnText, payUrl } = require("../constants");
+const { paymentInfo } = require("../payment/dataReq");
 
 const keyboardDefault = {
   reply_markup: {
@@ -56,10 +57,58 @@ const subscription = {
   },
 };
 
+const pay_btn = () => {
+  if (paymentInfo.pay_link) {
+    return {
+      inline_keyboard: [
+        [
+          {
+            text: btnText.buy,
+            callback_data: "btn_3",
+            url: paymentInfo.pay_link,
+          },
+        ],
+        [{ text: btnText.back, callback_data: "btn_4" }],
+      ],
+    };
+  } else {
+    return {
+      inline_keyboard: [
+        [
+          {
+            text: btnText.errPaymentBtn,
+            callback_data: "btn_4",
+          },
+        ],
+      ],
+    };
+  }
+};
+
+const btnIsPayment = () => {
+  return {
+    inline_keyboard: [
+      [{ text: btnText.acceptPayment, callback_data: "btn_4" }],
+    ],
+  };
+};
+
+const cancelPayment = {
+  reply_markup: {
+    resize_keyboard: true,
+    inline_keyboard: [
+      [{ text: btnText.cencelPayment, callback_data: "cancelP" }],
+    ],
+  },
+};
+
 module.exports = {
   keyboardDefault,
   keyboardDefaultReplay,
   keyboardBuy,
   keyboardGeneral,
   subscription,
+  pay_btn,
+  btnIsPayment,
+  cancelPayment,
 };

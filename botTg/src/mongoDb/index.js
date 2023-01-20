@@ -23,7 +23,7 @@ const connectDb = () => {
   } catch (error) {
     console.log(error);
   }
-
+  //docker local conect mongoDb
   // mongoose.connect(
   //   "mongodb://127.0.0.1:27017/subsUsers",
   //   { useNewUrlParser: true },
@@ -52,7 +52,7 @@ const createUser = () => {
   });
   connectDb().on("error", console.log).on("disconnect", connectDb);
 };
-const updateUser = (userId, pay, nameBtn, order_id, payment_id) => {
+const updateUser = (userId, pay, nameBtn, order_id, payment_id, title) => {
   connectDb();
   console.log("update user");
   SubsUsersSchema.updateOne(
@@ -60,9 +60,10 @@ const updateUser = (userId, pay, nameBtn, order_id, payment_id) => {
     {
       $set: {
         pay: pay,
-        subscribe: nameBtn === "btn_1" ? "1 month" : "6 month",
+        subscribe: nameBtn === "btn_1" ? 1 : 6,
         order_id,
         payment_id,
+        order_desc: title,
       },
     },
     (err, result) => {
@@ -128,7 +129,7 @@ const updateUserForPay = async (
 const getAllUsers = async () => {
   connectDb();
 
-  const allUsers = await SubsUsersSchema.find({});
+  const allUsers = await SubsUsersSchema.find({}).lean();
   connectDb().on("error", console.log).on("disconnect", connectDb);
 
   return allUsers;
@@ -146,10 +147,32 @@ const getOneUserById = async (user_id) => {
   return user;
 };
 
+const deletePayUser = (userId) => {
+  connectDb();
+  console.log("delete pay");
+  SubsUsersSchema.updateOne(
+    { user_id: userId },
+    {
+      $set: {
+        "payment.order_id": null,
+        "payment.order_status": "deleted",
+        "payment.rectoken": null,
+      },
+    },
+    (err, result) => {
+      if (err) {
+        console.log("Unable update user: ", err);
+      }
+    }
+  );
+  connectDb().on("error", console.log).on("disconnect", connectDb);
+};
+
 module.exports = {
   createUser,
   updateUser,
   getAllUsers,
   getOneUserById,
   updateUserForPay,
+  deletePayUser,
 };

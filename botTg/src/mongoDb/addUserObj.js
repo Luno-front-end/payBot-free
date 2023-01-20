@@ -6,6 +6,7 @@ const userInfo = {
   pay: Number,
   subscribe: String,
   order_id: String,
+  order_desc: String,
   payment_id: Number,
   title: String,
   payment: {

@@ -8,19 +8,29 @@ const {
   keyboardDefaultReplay,
   keyboardGeneral,
   subscription,
+  pay_btn,
+  cancelPayment,
+  btnIsPayment,
 } = require("./components/buttons");
 const {
   createUser,
   updateUser,
   getOneUserById,
   getAllUsers,
+  deletePayUser,
 } = require("./mongoDb/index");
 const { reqFondy, resPayment } = require("./payment/paymentsFondy");
-const { addInfoUserDB, priceConverter, timePay } = require("./helper");
+const {
+  addInfoUserDB,
+  priceConverter,
+  timePay,
+  acceptedMySubscription,
+} = require("./helper");
 const { createShaPost, createShaRes } = require("./payment/sha");
 const server = require("./server");
 
 require("dotenv").config();
+
 server();
 
 const token = process.env.BOT_TOKEN;
@@ -86,39 +96,40 @@ bot.on("callback_query", async (query) => {
         paymentTilte.titleStandart
       );
 
-      if (user.length === 0) {
-        createUser();
-      } else {
-        updateUser(
-          userId,
-          priceConverter(requestData.amount),
-          nameBtn,
-          generateId,
-          paymentInfo.pay_id
-        );
-      }
       // console.log("paymentInfo.pay_idBOT", paymentInfo.pay_id);
       resData.request.order_id = generateId;
       resData.request.signature = createShaRes();
 
-      setTimeout(() => {
-        bot.editMessageText(text.priceDays, {
-          chat_id,
-          message_id: message_id,
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: btnText.buy,
-                  callback_data: "btn_3",
-                  url: paymentInfo.pay_link,
-                },
-              ],
-              [{ text: btnText.back, callback_data: "btn_4" }],
-            ],
-          },
-        });
-      }, 500);
+      if (!user[0]?.payment.order_id) {
+        if (user.length === 0) {
+          createUser();
+        } else {
+          updateUser(
+            userId,
+            priceConverter(requestData.request.amount),
+            nameBtn,
+            generateId,
+            paymentInfo.pay_id,
+            paymentTilte.titleStandart
+          );
+        }
+        setTimeout(async () => {
+          await bot.editMessageText(text.priceDays, {
+            chat_id,
+            message_id: message_id,
+            reply_markup: { ...pay_btn() },
+          });
+        }, 500);
+      } else {
+        setTimeout(async () => {
+          await bot.editMessageText(text.priceDays, {
+            chat_id,
+            message_id: message_id,
+            reply_markup: { ...btnIsPayment() },
+          });
+        }, 500);
+      }
+
       // setInterval(() => {
       //   resPayment();
       // }, 25000);
@@ -157,40 +168,38 @@ bot.on("callback_query", async (query) => {
         paymentTilte.titleAdvanced
       );
 
-      if (user.length === 0) {
-        createUser();
-      } else {
-        updateUser(
-          userId,
-          priceConverter(requestData.amount),
-          nameBtn,
-          generateId,
-          paymentInfo.pay_id
-        );
-      }
-
       resData.request.order_id = generateId;
       resData.request.signature = createShaRes();
 
-      setTimeout(async () => {
-        await bot.editMessageText(text.priceMonth, {
-          chat_id,
-          message_id: message_id,
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: btnText.buy,
-                  callback_data: "btn_3",
-
-                  url: paymentInfo.pay_link,
-                },
-              ],
-              [{ text: btnText.back, callback_data: "btn_4" }],
-            ],
-          },
-        });
-      }, 500);
+      if (!user[0]?.payment.order_id) {
+        if (user.length === 0) {
+          createUser();
+        } else {
+          updateUser(
+            userId,
+            priceConverter(requestData.request.amount),
+            nameBtn,
+            generateId,
+            paymentInfo.pay_id,
+            paymentTilte.titleAdvanced
+          );
+        }
+        setTimeout(async () => {
+          await bot.editMessageText(text.priceMonth, {
+            chat_id,
+            message_id: message_id,
+            reply_markup: { ...pay_btn() },
+          });
+        }, 500);
+      } else {
+        setTimeout(async () => {
+          await bot.editMessageText(text.priceMonth, {
+            chat_id,
+            message_id: message_id,
+            reply_markup: { ...btnIsPayment() },
+          });
+        }, 500);
+      }
     }
 
     // if (nameBtn === "btn_3") {
@@ -204,7 +213,6 @@ bot.on("callback_query", async (query) => {
         reply_markup: keyboardDefaultReplay,
       });
     }
-
     if (nameBtn === "btn_5") {
       await bot.answerCallbackQuery(id);
       bot.editMessageText(text.choice, {
@@ -212,6 +220,11 @@ bot.on("callback_query", async (query) => {
         message_id: message_id,
         reply_markup: keyboardDefaultReplay,
       });
+    }
+    if (nameBtn === "cancelP") {
+      await bot.answerCallbackQuery(id);
+      deletePayUser(userId);
+      bot.sendMessage(chat_id, "Тестове повідомлення про відписку");
     }
   } catch (error) {
     console.error(error);
@@ -223,15 +236,21 @@ bot.on("message", async (msg) => {
     const msgText = msg.text;
     const chatId = msg.chat.id;
 
-    console.log(chatId);
+    const user = await getOneUserById(chatId);
+    // console.log(user);
 
     switch (msgText) {
       case btnText.tariff:
         bot.sendMessage(chatId, text.choice, { ...keyboardDefault });
-
         break;
       case btnText.mySubscription:
-        bot.sendMessage(chatId, text.mySubscription, { ...subscription });
+        if (!user[0]?.payment.order_id) {
+          bot.sendMessage(chatId, text.mySubscription, { ...subscription });
+        } else {
+          bot.sendMessage(chatId, acceptedMySubscription(user), {
+            ...cancelPayment,
+          });
+        }
         break;
       case btnText.clubRules:
         bot.sendMessage(chatId, text.clubRules);

@@ -6,10 +6,10 @@ const subsUsers = new Schema({
   username: String,
   user_id: Number,
   pay: Number,
-  subscribe: String,
+  subscribe: Number,
   order_id: String,
+  order_desc: String,
   payment_id: Number,
-  title: String,
   payment: {
     sender_email: String,
     order_id: String,

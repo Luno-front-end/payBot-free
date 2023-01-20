@@ -1,6 +1,8 @@
 const { json } = require("express");
 const express = require("express");
-const { updateUserForPay } = require("./mongoDb/index");
+const { create } = require("express-handlebars");
+
+const { updateUserForPay, getAllUsers } = require("./mongoDb/index");
 const { paymentInfo } = require("./payment/dataReq");
 const {
   paymentStatus,
@@ -8,42 +10,53 @@ const {
   timeEditPay,
   alertPrePay,
 } = require("./helper");
-// const userInfo = require("./mongoDb/addUserObj");
 
 const app = express();
 
-const userInfo = {
-  first_name: "Макс",
-  last_name: "Ткачук",
-  username: "ingener2k17",
-  user_id: "382298066",
-  pay: 250,
-  subscribe: 1,
-  order_id: "b4359e57-7890-4682-851a-128acc3408f8",
-  payment_id: "547288641",
-  title: "Підписка на абонимент. 6 місяців Standart 250$",
-  payment: {
-    sender_email: "makcimys001@gmail.com",
+const userInfo = [
+  {
+    first_name: "Макс",
+    last_name: "Ткачук",
+    username: "ingener2k17",
+    user_id: "382298066",
+    pay: 250,
+    subscribe: 1,
     order_id: "b4359e57-7890-4682-851a-128acc3408f8",
-    order_status: "approved",
-    rectoken: "a41087ed7ce6d8a3e659549d0e1978393ddc266",
-    datePay: "18/01/2023",
-    dateEnd: "18/07/2023",
+    payment_id: "547288641",
+    title: "Підписка на абонимент. 6 місяців Standart 250$",
+    payment: {
+      sender_email: "makcimys001@gmail.com",
+      order_id: "b4359e57-7890-4682-851a-128acc3408f8",
+      order_status: "approved",
+      rectoken: "a41087ed7ce6d8a3e659549d0e1978393ddc266",
+      datePay: "18/01/2023",
+      dateEnd: "18/07/2023",
+    },
   },
-};
-
+];
 require("dotenv").config();
+
 app.use(express.json());
+
 const server = () => {
-  // const generalPage = "index";
+  const hbs = create({
+    defaultLayout: "main",
+    extname: "hbs",
+    layoutsDir: __dirname + "/views/layouts/",
+    partialsDir: __dirname + "/views/partials",
+  });
+  app.engine("hbs", hbs.engine);
+  app.set("view engine", "hbs");
+  app.set("views", "./views");
 
-  app.set("view engine", "ejs");
-  // app.set("view", "./templates");
+  app.use(express.static(__dirname + "/views/public"));
 
-  app.use(express.static(__dirname + "/templates/public"));
-
-  app.get("/", (req, res) => {
-    res.render(__dirname + "/templates/index", { ...userInfo });
+  app.get("/users", async (req, res) => {
+    const allUsers = await getAllUsers();
+    console.log(allUsers[0].first_name);
+    res.render(__dirname + "/views/index", {
+      allUsers: allUsers,
+    });
   });
 
   app.all("/fondyPay", async (req, res) => {
