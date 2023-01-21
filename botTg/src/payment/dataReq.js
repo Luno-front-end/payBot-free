@@ -13,14 +13,6 @@ const requestData = {
     server_callback_url: process.env.CALL_BACK_URL,
   },
 };
-//  recurring_data: {
-//     amount: 5000,
-//     end_time: "2026-11-14",
-//     every: 1,
-//     period: "month",
-//     start_time: "2023-01-21",
-//   },
-// subscription: "Y",
 
 const recurringData = {
   request: {
@@ -47,28 +39,4 @@ const paymentInfo = {
   pay_id: "",
 };
 
-// const paymentInfoUserSubs = {
-//   order_id: "",
-//   order_status: "",
-//   rectoken: "",
-//   order_status: "",
-// };
-
 module.exports = { requestData, resData, paymentInfo, recurringData };
-// {
-// "request": {
-// "merchant_id": 1396424,
-// "order_id": "test3195692233.5",
-// "action": "stop",
-// "signature": "d1544545b8fe2820bdf78006571694cbea81430d"
-// }
-// }
-
-// "response": {
-// "response_status": "success",
-// "merchant_id": 1396424,
-// "order_id": "test3195692233.5",
-// "status": "disabled",
-// "signature": "d1544545b8fe2820bdf78006571694cbea81430d"
-// }
-// }

@@ -1,4 +1,4 @@
-const { text, btnText, payUrl } = require("../constants");
+const { btnText } = require("../constants");
 const { paymentInfo } = require("../payment/dataReq");
 
 const keyboardDefault = {
@@ -6,8 +6,8 @@ const keyboardDefault = {
     resize_keyboard: true,
     inline_keyboard: [
       [
-        { text: btnText.days, callback_data: "btn_1" },
-        { text: btnText.month, callback_data: "btn_2" },
+        { text: btnText.days, callback_data: "st_btn" },
+        { text: btnText.vip, callback_data: "vip_btn" },
       ],
     ],
   },
@@ -16,21 +16,9 @@ const keyboardDefaultReplay = {
   resize_keyboard: true,
   inline_keyboard: [
     [
-      { text: btnText.days, callback_data: "btn_1" },
-      { text: btnText.month, callback_data: "btn_2" },
+      { text: btnText.days, callback_data: "st_btn" },
+      { text: btnText.vip, callback_data: "vip_btn" },
     ],
-  ],
-};
-
-const keyboardBuy = {
-  inline_keyboard: [
-    [
-      {
-        text: btnText.buy,
-        callback_data: "btn_3",
-      },
-    ],
-    [{ text: btnText.back, callback_data: "btn_4" }],
   ],
 };
 
@@ -68,7 +56,7 @@ const pay_btn = () => {
             url: paymentInfo.pay_link,
           },
         ],
-        [{ text: btnText.back, callback_data: "btn_4" }],
+        [{ text: btnText.back, callback_data: "back" }],
       ],
     };
   } else {
@@ -77,7 +65,7 @@ const pay_btn = () => {
         [
           {
             text: btnText.errPaymentBtn,
-            callback_data: "btn_4",
+            callback_data: "back",
           },
         ],
       ],
@@ -87,9 +75,7 @@ const pay_btn = () => {
 
 const btnIsPayment = () => {
   return {
-    inline_keyboard: [
-      [{ text: btnText.acceptPayment, callback_data: "btn_4" }],
-    ],
+    inline_keyboard: [[{ text: btnText.acceptPayment, callback_data: "back" }]],
   };
 };
 
@@ -101,14 +87,21 @@ const cancelPayment = {
     ],
   },
 };
+const cancelSecurityPayment = {
+  resize_keyboard: true,
+  inline_keyboard: [
+    [{ text: btnText.cencelProtectionPayment, callback_data: "cancelSP" }],
+    [{ text: btnText.back, callback_data: "back" }],
+  ],
+};
 
 module.exports = {
   keyboardDefault,
   keyboardDefaultReplay,
-  keyboardBuy,
   keyboardGeneral,
   subscription,
   pay_btn,
   btnIsPayment,
   cancelPayment,
+  cancelSecurityPayment,
 };

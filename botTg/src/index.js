@@ -2,7 +2,12 @@ const TelegramBot = require("node-telegram-bot-api");
 const { v1: uuidv1, v4: uuidv4 } = require("uuid");
 
 const { text, btnText, paymentTilte } = require("./constants");
-const { requestData, resData, paymentInfo } = require("./payment/dataReq");
+const {
+  requestData,
+  resData,
+  paymentInfo,
+  recurringData,
+} = require("./payment/dataReq");
 const {
   keyboardDefault,
   keyboardDefaultReplay,
@@ -11,6 +16,7 @@ const {
   pay_btn,
   cancelPayment,
   btnIsPayment,
+  cancelSecurityPayment,
 } = require("./components/buttons");
 const {
   createUser,
@@ -18,15 +24,21 @@ const {
   getOneUserById,
   getAllUsers,
   deletePayUser,
+  recurringPayResponseDB,
 } = require("./mongoDb/index");
-const { reqFondy, resPayment } = require("./payment/paymentsFondy");
+const { reqFondy, recurringPay } = require("./payment/paymentsFondy");
 const {
   addInfoUserDB,
   priceConverter,
   timePay,
   acceptedMySubscription,
+  recurringPayHelp,
 } = require("./helper");
-const { createShaPost, createShaRes } = require("./payment/sha");
+const {
+  createShaPost,
+  createShaRes,
+  createShaRecurring,
+} = require("./payment/sha");
 const server = require("./server");
 
 require("dotenv").config();
@@ -35,8 +47,6 @@ server();
 
 const token = process.env.BOT_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
-
-// let payLink = "";
 
 bot.onText(/\/start/, async (msg) => {
   try {
@@ -70,7 +80,7 @@ bot.on("callback_query", async (query) => {
     const generateId = uuidv4();
     const user = await getOneUserById(userId);
 
-    if (nameBtn === "btn_1") {
+    if (nameBtn === "st_btn") {
       await bot.answerCallbackQuery(id);
 
       requestData.request.amount = 5000;
@@ -79,7 +89,6 @@ bot.on("callback_query", async (query) => {
       requestData.request.signature = createShaPost();
 
       await reqFondy().then((res) => {
-        console.log(res);
         paymentInfo.pay_id = res.response.payment_id;
         paymentInfo.pay_link = res.response.checkout_url;
       });
@@ -96,7 +105,6 @@ bot.on("callback_query", async (query) => {
         paymentTilte.titleStandart
       );
 
-      // console.log("paymentInfo.pay_idBOT", paymentInfo.pay_id);
       resData.request.order_id = generateId;
       resData.request.signature = createShaRes();
 
@@ -129,25 +137,14 @@ bot.on("callback_query", async (query) => {
           });
         }, 500);
       }
-
-      // setInterval(() => {
-      //   resPayment();
-      // }, 25000);
-
-      // function timer(flag) {
-      //     var intervalId = setInterval (function(){...}
-      //     if (flag == 'false') {
-      //                 clearInterval(intervalId);
-      //              }
-      // }
     }
 
-    if (nameBtn === "btn_2") {
+    if (nameBtn === "vip_btn") {
       await bot.answerCallbackQuery(id);
 
-      requestData.request.amount = 25000;
+      requestData.request.amount = 15000;
       requestData.request.order_id = generateId;
-      requestData.request.order_desc = paymentTilte.titleAdvanced;
+      requestData.request.order_desc = paymentTilte.titleVIP;
       requestData.request.signature = createShaPost();
 
       await reqFondy().then((res) => {
@@ -165,7 +162,7 @@ bot.on("callback_query", async (query) => {
         generateId,
         paymentInfo.pay_id,
         requestData.request.amount,
-        paymentTilte.titleAdvanced
+        paymentTilte.titleVIP
       );
 
       resData.request.order_id = generateId;
@@ -181,11 +178,11 @@ bot.on("callback_query", async (query) => {
             nameBtn,
             generateId,
             paymentInfo.pay_id,
-            paymentTilte.titleAdvanced
+            paymentTilte.titleVIP
           );
         }
         setTimeout(async () => {
-          await bot.editMessageText(text.priceMonth, {
+          await bot.editMessageText(text.priceVip, {
             chat_id,
             message_id: message_id,
             reply_markup: { ...pay_btn() },
@@ -193,7 +190,7 @@ bot.on("callback_query", async (query) => {
         }, 500);
       } else {
         setTimeout(async () => {
-          await bot.editMessageText(text.priceMonth, {
+          await bot.editMessageText(text.priceVip, {
             chat_id,
             message_id: message_id,
             reply_markup: { ...btnIsPayment() },
@@ -202,10 +199,7 @@ bot.on("callback_query", async (query) => {
       }
     }
 
-    // if (nameBtn === "btn_3") {
-    // }
-
-    if (nameBtn === "btn_4") {
+    if (nameBtn === "back") {
       await bot.answerCallbackQuery(id);
       bot.editMessageText(text.choice, {
         chat_id,
@@ -223,8 +217,18 @@ bot.on("callback_query", async (query) => {
     }
     if (nameBtn === "cancelP") {
       await bot.answerCallbackQuery(id);
+      const user = await getOneUserById(userId);
+
+      bot.editMessageText(acceptedMySubscription(user), {
+        chat_id,
+        message_id: message_id,
+        reply_markup: cancelSecurityPayment,
+      });
+    }
+    if (nameBtn === "cancelSP") {
+      await bot.answerCallbackQuery(id);
       deletePayUser(userId);
-      bot.sendMessage(chat_id, "Тестове повідомлення про відписку");
+      bot.sendMessage(chat_id, btnText.acceptCencelPayment);
     }
   } catch (error) {
     console.error(error);
@@ -237,7 +241,6 @@ bot.on("message", async (msg) => {
     const chatId = msg.chat.id;
 
     const user = await getOneUserById(chatId);
-    // console.log(user);
 
     switch (msgText) {
       case btnText.tariff:
@@ -251,6 +254,7 @@ bot.on("message", async (msg) => {
             ...cancelPayment,
           });
         }
+
         break;
       case btnText.clubRules:
         bot.sendMessage(chatId, text.clubRules);
@@ -266,24 +270,29 @@ bot.on("message", async (msg) => {
   }
 });
 
-// setInterval(async () => {
-//   const date = timePay();
-//   const users = await getAllUsers();
-//   console.log("object");
-//   users.forEach((user) => {
-//     if (user.payment.datePay === date) {
-//       bot.sendMessage(user.user_id, "Підписка була продовжена!🫡 🎉");
-//     }
-//   });
-// }, 30000);
+setInterval(async () => {
+  const date = timePay();
+  const users = await getAllUsers();
 
-// const { Api, TelegramClient
-// } = require("telegram")
-// const { StringSession } = require("telegram/sessions");
-
-// В КОМЕНТИ КРАЩЕ ВПИСАТИ МІСЯЦЬ АБО 6 МІСЯЦІВ ДЛЯ ВІДСЛІДКОВУВАННЯ ПІДПИСКИ.
-
-// const { optionFn } = require("./helper");
-
-// const session = new StringSession("");
-// const client = new TelegramClient(session, apiId, apiHash, {});
+  users.forEach((user) => {
+    if (user.payment.dateEnd === date && user.payment.rectoken) {
+      const generateId = uuidv4();
+      recurringPayHelp(
+        user.payment.rectoken,
+        generateId,
+        user.order_desc,
+        user.payment.amount
+      );
+      recurringData.request.signature = createShaRecurring();
+      const errorMessage = () => bot.sendMessage(user.user_id, text.errorRePay);
+      recurringPay().then((res) => {
+        if (res.response.error_code) {
+          return errorMessage();
+        } else {
+          recurringPayResponseDB(res.response, user.user_id, errorMessage);
+          return bot.sendMessage(user.user_id, "Підписка була продовжена!🫡 🎉");
+        }
+      });
+    }
+  });
+}, 10000);

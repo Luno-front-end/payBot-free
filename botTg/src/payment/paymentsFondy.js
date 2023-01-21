@@ -28,7 +28,7 @@ const resPayment = async () => {
 
 const recurringPay = async () => {
   return await axios
-    .post(recurringUrl, requestData)
+    .post(recurringUrl, recurringData)
     .then((res) => res.data)
     .catch((error) => {
       console.log(error);

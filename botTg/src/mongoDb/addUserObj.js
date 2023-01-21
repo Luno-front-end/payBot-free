@@ -9,7 +9,9 @@ const userInfo = {
   order_desc: String,
   payment_id: Number,
   title: String,
+  deleteDate: null,
   payment: {
+    amount: null,
     sender_email: null,
     order_id: null,
     order_status: null,

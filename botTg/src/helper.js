@@ -1,7 +1,10 @@
 const moment = require("moment");
 
 const userInfo = require("./mongoDb/addUserObj");
-const { text } = require("./constants");
+const { recurringData } = require("./payment/dataReq");
+
+const { text, btnText } = require("./constants");
+const { request } = require("express");
 
 const dateSubs = () => {
   const oneM = moment().add(1, "month").calendar();
@@ -24,7 +27,7 @@ const dateSubs = () => {
 
 const priceConverter = (pay) => {
   if (pay === 5000) return 50;
-  if (pay === 25000) return 250;
+  if (pay === 15000) return 150;
 };
 
 const addInfoUserDB = (
@@ -43,20 +46,25 @@ const addInfoUserDB = (
   userInfo.username = userName;
   userInfo.user_id = userId;
   userInfo.pay = priceConverter(ammount);
-  subscribe === "btn_1" ? (userInfo.subscribe = 1) : (userInfo.subscribe = 6);
+  userInfo.subscribe = 1;
   userInfo.order_id = order_id;
-  // userInfo.datePay = dateSubs().datePay;
-  // userInfo.dateEnd =
-  // subscribe === "btn_1" ? dateSubs().dateEndOne : dateSubs().dateEndTwo;
   userInfo.payment_id = payId;
   userInfo.order_desc = title;
 };
 
-const paymentStatus = (mail, orderId, status, rectoken) => {
+const paymentStatus = (mail, orderId, status, rectoken, amount) => {
   userInfo.payment.sender_email = mail;
   userInfo.payment.order_id = orderId;
   userInfo.payment.order_status = status;
   userInfo.payment.rectoken = rectoken;
+  userInfo.payment.amount = amount;
+};
+
+const recurringPayHelp = (rectoken, order_id, order_desc, amount) => {
+  recurringData.request.rectoken = rectoken;
+  recurringData.request.order_desc = order_desc;
+  recurringData.request.amount = amount;
+  recurringData.request.order_id = order_id;
 };
 
 const timePay = () => {
@@ -113,15 +121,13 @@ const timePay = () => {
 //   };
 //   const www = date.setTime(date.getTime()) - dayMilliseconds;
 //   const newDay = new Date(www);
-//   console.log(newDay);
 //   return `${day()}/${month()}/${year}`;
 // };
 
 const timeEditPay = (res) => {
-  // const time = res.toString();
-  const time = "18.01.2023 21:59:37";
+  const time = res.toString();
+  // const time = "18.01.2023 21:59:37";
   const timeEdit = time.replace(/[.]/g, "/").slice(0, 10);
-  console.log(timeEdit);
   return timeEdit;
 };
 // const timeEditPay = (res) => {
@@ -133,23 +139,17 @@ const timeEditPay = (res) => {
 //   const date = timeEdit.slice(3, 5);
 //   const yearh = timeEdit.slice(6, 10);
 
-//   console.log(`${month}/${date}/${yearh}`);
-
 //   return `${month}/${date}/${yearh}`;
 // };
 
 const acceptedMySubscription = (subsUser) => {
-  console.log(subsUser);
   if (!subsUser[0]?.payment.order_id) {
     return text.mySubscription;
   } else {
-    return `⌛️ У вас підписка на ${subsUser[0].subscribe} місяць/мсяців.
+    return `⌛️ У вас підписка на ${subsUser[0].subscribe} місяц.
+Тип підписки: ${subsUser[0].pay === 50 ? btnText.days : btnText.vip}
 Підписалися: ${subsUser[0].payment.datePay} 
-Дата закінчення або дата продовження: ${subsUser[0].payment.dateEnd}
-
-Зараз ви можете тільки зупини підписку,
-натиснувши кнопку "Припинити оплачувати, та відписатися".
-Підписка видалиться, а на слідуючий місяць списання не відбудеться. 🥲`;
+Дата закінчення: ${subsUser[0].payment.dateEnd}`;
   }
 };
 
@@ -157,8 +157,8 @@ module.exports = {
   addInfoUserDB,
   dateSubs,
   priceConverter,
-  paymentStatus,
   timePay,
   timeEditPay,
   acceptedMySubscription,
+  recurringPayHelp,
 };
