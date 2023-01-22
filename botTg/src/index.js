@@ -168,7 +168,7 @@ bot.on("callback_query", async (query) => {
       resData.request.order_id = generateId;
       resData.request.signature = createShaRes();
 
-      if (!user[0]?.payment.order_id) {
+      if (!user[0].payment.order_id) {
         if (user.length === 0) {
           createUser();
         } else {
@@ -247,7 +247,7 @@ bot.on("message", async (msg) => {
         bot.sendMessage(chatId, text.choice, { ...keyboardDefault });
         break;
       case btnText.mySubscription:
-        if (!user[0]?.payment.order_id) {
+        if (!user[0].payment.order_id) {
           bot.sendMessage(chatId, text.mySubscription, { ...subscription });
         } else {
           bot.sendMessage(chatId, acceptedMySubscription(user), {
