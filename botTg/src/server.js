@@ -58,8 +58,9 @@ const server = () => {
     }
   });
 
-  app.listen(process.env.PORT, () => {
+  app.listen(process.env.PORT, "127.0.0.1", () => {
     console.log(`Example app listening on port ${process.env.PORT}`);
   });
 };
+
 module.exports = server;
