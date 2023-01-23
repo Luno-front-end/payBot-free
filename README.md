@@ -1,1 +1,4 @@
-Бот створенний для клієнта який мав бажання отримувати клієнтів та оплату через бота.
+This is a Telegram bot. It is designed for use by real people. It is connected to a payment system that accepts payments. The bot is also connected to a database that collects information about people who have made payments, monitors automatic withdrawals every month and, if a payment fails, will not let you forget about it. There is also an unsubscribe function, which makes it possible to no longer withdraw funds from the client's card. If there is any problem with the formation of the payment link, the bot will warn about it and will not allow an incorrect payment to be made in case of an error in the formation of the link, in response the Fondy payment system receives an error status and the client is shown a button that something went wrong.
+As well as an informative page about subscribers, implemented through hbs js. The server provides an html page and static files. Colors and information vary depending on the data in the mongoDb database
+
+After entering all the variables, the bot can be run with the command "npm run start:dev"
