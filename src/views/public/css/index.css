@@ -304,3 +304,6 @@ textarea {
 .user-list-dell {
   background-color: rgb(180 180 180 / 80%);
 }
+.user-list-declined {
+  background-color: rgba(255, 157, 0, 0.803);
+}

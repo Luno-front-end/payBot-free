@@ -286,6 +286,9 @@ setInterval(async () => {
       recurringData.request.signature = createShaRecurring();
       const errorMessage = () => bot.sendMessage(user.user_id, text.errorRePay);
       recurringPay().then((res) => {
+        if (res.response.order_status === "declined") {
+          return errorMessage();
+        }
         if (res.response.error_code) {
           return errorMessage();
         } else {
