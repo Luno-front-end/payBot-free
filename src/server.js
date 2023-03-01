@@ -1,7 +1,11 @@
 const express = require("express");
 const exphbs = require("express-handlebars");
 
-const { updateUserForPay, getAllUsers } = require("./mongoDb/index");
+const {
+  updateUserForPay,
+  getAllUsers,
+  updateUserStatusPay,
+} = require("./mongoDb/index");
 const { timeEditPay } = require("./helper");
 const { getStatus, getColorStatus } = require("./components/helperHbs");
 
@@ -51,9 +55,17 @@ const server = () => {
         response.order_status,
         response.rectoken,
         timeEditPay(response.order_time),
-        response.amount
+        response.amount,
+        response.payment_system,
+        response.card_type
       );
+
       res.status(200).send("HTTP 200 OK");
+      res.end();
+    }
+    if (response.order_status === "declined") {
+      await updateUserStatusPay(response.payment_id, response.order_status);
+      res.status(500).send("HTTP 500 OK");
       res.end();
     }
   });

@@ -3,6 +3,8 @@ const getStatus = (status) => {
     return "Оплачено";
   } else if (status === null) {
     return "Не оплачено";
+  } else if (status === "declined") {
+    return "ВІДХИЛЕНО";
   } else if (status === "deleted") {
     return "Відписався";
   }
@@ -13,6 +15,8 @@ const getColorStatus = (status) => {
     return "user-list-ok";
   } else if (status === null) {
     return "user-list-null";
+  } else if (status === "declined") {
+    return "user-list-declined";
   } else if (status === "deleted") {
     return "user-list-dell";
   }

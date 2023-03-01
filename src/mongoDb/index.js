@@ -83,7 +83,9 @@ const updateUserForPay = async (
   status,
   rectoken,
   timePay,
-  amount
+  amount,
+  payment_system,
+  card_type
 ) => {
   try {
     connectDb();
@@ -102,7 +104,34 @@ const updateUserForPay = async (
                 datePay: timePay,
                 dateEnd: dateSubs().dateEndOne,
                 amount: Number(amount),
+                payment_system: payment_system,
+                card_type: card_type,
               },
+            },
+          },
+          (err, result) => {
+            if (err) {
+              console.log("Unable update user: ", err);
+            }
+          }
+        )
+      : console.log("Щось пішло не так");
+
+    connectDb().on("error", console.log).on("disconnect", connectDb);
+  } catch (error) {
+    console.log(error);
+  }
+};
+const updateUserStatusPay = async (pay_id, status) => {
+  try {
+    connectDb();
+    const user = await getOneUsersByPayId(pay_id);
+    pay_id === user[0].payment_id
+      ? SubsUsersSchema.updateOne(
+          { payment_id: pay_id },
+          {
+            $set: {
+              "payment.order_status": status,
             },
           },
           (err, result) => {
@@ -196,4 +225,5 @@ module.exports = {
   updateUserForPay,
   deletePayUser,
   recurringPayResponseDB,
+  updateUserStatusPay,
 };

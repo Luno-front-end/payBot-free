@@ -19,6 +19,8 @@ const subsUsers = new Schema({
     datePay: String,
     dateEnd: String,
     amount: Number,
+    payment_system: String,
+    card_type: String,
   },
 });
 

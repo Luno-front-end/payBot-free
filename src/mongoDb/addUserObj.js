@@ -18,6 +18,8 @@ const userInfo = {
     rectoken: null,
     datePay: null,
     dateEnd: null,
+    payment_system: null,
+    card_type: null,
   },
 };
 
