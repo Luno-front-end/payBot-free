@@ -64,7 +64,22 @@ const server = () => {
       res.end();
     }
     if (response.order_status === "declined") {
-      await updateUserStatusPay(response.payment_id, response.order_status);
+      await updateUserStatusPay(
+        response.payment_id,
+        response.order_status,
+        response.payment_system,
+        response.card_type
+      );
+      res.status(500).send("HTTP 500 OK");
+      res.end();
+    }
+    if (response.order_status === "processing") {
+      await updateUserStatusPay(
+        response.payment_id,
+        response.order_status,
+        response.payment_system,
+        response.card_type
+      );
       res.status(500).send("HTTP 500 OK");
       res.end();
     }

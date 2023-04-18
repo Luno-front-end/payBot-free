@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  db:
+    container_name: mongo-bot-prod
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27017:27017" # список відкритих назовні портів <hostPort>:<containerPort>
+    volumes:
+      - ./mongo:/var/lib/postgresql/data

@@ -3,7 +3,7 @@ const moment = require("moment");
 const userInfo = require("./mongoDb/addUserObj");
 const { recurringData } = require("./payment/dataReq");
 
-const { text, btnText } = require("./constants");
+const { text, btnText } = require("./constantsUK");
 const { request } = require("express");
 
 const dateSubs = () => {
@@ -39,7 +39,8 @@ const addInfoUserDB = (
   order_id,
   payId,
   ammount,
-  title
+  title,
+  lang
 ) => {
   userInfo.first_name = firstName;
   userInfo.last_name = lastName;
@@ -50,6 +51,7 @@ const addInfoUserDB = (
   userInfo.order_id = order_id;
   userInfo.payment_id = payId;
   userInfo.order_desc = title;
+  userInfo.lang = lang;
 };
 
 const paymentStatus = (mail, orderId, status, rectoken, amount) => {

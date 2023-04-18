@@ -1,4 +1,4 @@
-const { btnText } = require("../constants");
+const { btnText } = require("../constantsUK");
 const { paymentInfo } = require("../payment/dataReq");
 
 const keyboardDefault = {

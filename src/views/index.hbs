@@ -1,9 +1,7 @@
 {{#if allUsers.length}}
   {{#each allUsers}}
-    {{! <div class="container"> }}
 
     <section class="user">
-      {{! <h1 class="header-info">Інфо Юзерс</h1> }}
 
       <div class="info {{getColorStatus payment.order_status}}">
         <div class="status">
@@ -47,6 +45,22 @@
                   <span class="mar">Яка підписка:</span>
                   <span class="pay-el sub-type">{{order_desc}}</span>
                 </li>
+                <li class="pay-item">
+                  <span class="mar">Система: </span>
+                  <span class="pay-el sub-type">
+
+                    {{#if payment.payment_system}}
+                      {{payment.payment_system}}
+                    {{else}} невідомо {{/if}}</span>
+                </li>
+                <li class="pay-item">
+                  <span class="mar">Карта: </span>
+                  <span class="pay-el sub-type">
+                    {{#if payment.card_type}}
+                      {{payment.card_type}}
+                    {{else}} невідомо {{/if}}</span>
+                </li>
+
               </ul>
             </div>
             <div class="order">
@@ -71,7 +85,6 @@
         </div>
       </div>
     </section>
-    {{! </div> }}
 
   {{/each}}
 

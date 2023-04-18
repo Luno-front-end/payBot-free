@@ -11,6 +11,7 @@ const subsUsers = new Schema({
   order_desc: String,
   payment_id: Number,
   deleteDate: String,
+  lang: String,
   payment: {
     sender_email: String,
     order_id: String,
