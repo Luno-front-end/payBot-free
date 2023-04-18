@@ -5,8 +5,7 @@ const userInfo = require("./addUserObj");
 const { dateSubs, timeEditPay } = require("../helper");
 
 require("dotenv").config();
-// process.env.URL_CONNECT
-// "mongodb://127.0.0.1:27017",
+
 const connectDb = () => {
   try {
     mongoose.connect(
@@ -23,17 +22,7 @@ const connectDb = () => {
   } catch (error) {
     console.log(error);
   }
-  //docker local conect mongoDb
-  // mongoose.connect(
-  //   "mongodb://127.0.0.1:27017/subsUsers",
-  //   { useNewUrlParser: true },
-  // (err, client) => {
-  //   if (err) {
-  //     console.log("Connection error", err);
-  //   }
-  //   // console.log("Connected!");
-  // }
-  // );
+
   return mongoose.connection;
 };
 
@@ -49,7 +38,15 @@ const createUser = () => {
   });
   connectDb().on("error", console.log).on("disconnect", connectDb);
 };
-const updateUser = (userId, pay, nameBtn, order_id, payment_id, title) => {
+const updateUser = (
+  userId,
+  pay,
+  nameBtn,
+  order_id,
+  payment_id,
+  title,
+  lang
+) => {
   connectDb();
   SubsUsersSchema.updateOne(
     { user_id: userId },
@@ -60,6 +57,7 @@ const updateUser = (userId, pay, nameBtn, order_id, payment_id, title) => {
         order_id,
         payment_id,
         order_desc: title,
+        lang: lang,
       },
     },
     (err, result) => {
@@ -122,7 +120,7 @@ const updateUserForPay = async (
     console.log(error);
   }
 };
-const updateUserStatusPay = async (pay_id, status) => {
+const updateUserStatusPay = async (pay_id, status, system, card) => {
   try {
     connectDb();
     const user = await getOneUsersByPayId(pay_id);
@@ -132,6 +130,8 @@ const updateUserStatusPay = async (pay_id, status) => {
           {
             $set: {
               "payment.order_status": status,
+              "payment.payment_system": system,
+              "payment.card_type": card,
             },
           },
           (err, result) => {
@@ -217,6 +217,28 @@ const recurringPayResponseDB = (res, userId, errorMessage) => {
     connectDb().on("error", console.log).on("disconnect", connectDb);
   }
 };
+
+const updateUserLang = (userTgId, lang) => {
+  try {
+    connectDb();
+
+    SubsUsersSchema.updateOne(
+      { user_id: userTgId },
+      {
+        $set: { lang: lang },
+      },
+      (err, result) => {
+        if (err) {
+          console.log("Unable update user: ", err);
+        }
+      }
+    );
+
+    connectDb().on("error", console.log).on("disconnect", connectDb);
+  } catch (error) {
+    console.log(error);
+  }
+};
 module.exports = {
   createUser,
   updateUser,
@@ -226,4 +248,5 @@ module.exports = {
   deletePayUser,
   recurringPayResponseDB,
   updateUserStatusPay,
+  updateUserLang,
 };

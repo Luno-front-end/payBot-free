@@ -1,7 +1,10 @@
 const TelegramBot = require("node-telegram-bot-api");
 const { v1: uuidv1, v4: uuidv4 } = require("uuid");
+const axios = require("axios");
 
-const { text, btnText, paymentTilte } = require("./constants");
+const { text, btnText, paymentTilte } = require("./constantsUK");
+const { textRu, btnTextRu, paymentTilteRu } = require("./constantsRU");
+
 const {
   requestData,
   resData,
@@ -19,12 +22,23 @@ const {
   cancelSecurityPayment,
 } = require("./components/buttons");
 const {
+  keyboardDefaultRu,
+  keyboardDefaultReplayRu,
+  keyboardGeneralRu,
+  subscriptionRu,
+  pay_btnRu,
+  btnIsPaymentRu,
+  cancelPaymentRu,
+  cancelSecurityPaymentRu,
+} = require("./components/buttonsRu");
+const {
   createUser,
   updateUser,
   getOneUserById,
   getAllUsers,
   deletePayUser,
   recurringPayResponseDB,
+  updateUserLang,
 } = require("./mongoDb/index");
 const { reqFondy, recurringPay } = require("./payment/paymentsFondy");
 const {
@@ -50,14 +64,19 @@ const bot = new TelegramBot(token, { polling: true });
 
 bot.onText(/\/start/, async (msg) => {
   try {
+    lang = msg.from.language_code;
     pic = "src/img/prev.jpg";
     chat_id = msg.chat.id;
     await bot.sendPhoto(chat_id, pic, {
-      caption: text.caption,
-      reply_markup: keyboardGeneral,
+      caption: lang === "uk" ? text.caption : textRu.caption,
+      reply_markup: lang === "uk" ? keyboardGeneral : keyboardGeneralRu,
     });
 
-    await bot.sendMessage(chat_id, text.choice, { ...keyboardDefault });
+    await bot.sendMessage(
+      chat_id,
+      lang === "uk" ? text.choice : textRu.choice,
+      lang === "uk" ? { ...keyboardDefault } : { ...keyboardDefaultRu }
+    );
   } catch (error) {
     console.error(error);
   }
@@ -65,18 +84,20 @@ bot.onText(/\/start/, async (msg) => {
 
 bot.on("callback_query", async (query) => {
   try {
+    lang = query.from.language_code;
+
     //chat info
     const nameBtn = query.data;
     const id = query.id;
     const chat_id = query.message.chat.id;
     const message_id = query.message.message_id;
 
-    // userInfo
     const userId = query.from.id;
     const userFirstName = query.from.first_name;
     const userLastName = query.from.last_name;
     const username = query.from.username;
 
+    updateUserLang(userId, lang);
     const generateId = uuidv4();
     const user = await getOneUserById(userId);
 
@@ -85,7 +106,10 @@ bot.on("callback_query", async (query) => {
 
       requestData.request.amount = 5000;
       requestData.request.order_id = generateId;
-      requestData.request.order_desc = paymentTilte.titleStandart;
+      requestData.request.order_desc =
+        lang === "uk"
+          ? paymentTilte.titleStandart
+          : paymentTilteRu.titleStandart;
       requestData.request.signature = createShaPost();
 
       await reqFondy().then((res) => {
@@ -102,7 +126,10 @@ bot.on("callback_query", async (query) => {
         generateId,
         paymentInfo.pay_id,
         requestData.request.amount,
-        paymentTilte.titleStandart
+        lang === "uk"
+          ? paymentTilte.titleStandart
+          : paymentTilteRu.titleStandart,
+        lang
       );
 
       resData.request.order_id = generateId;
@@ -118,23 +145,35 @@ bot.on("callback_query", async (query) => {
             nameBtn,
             generateId,
             paymentInfo.pay_id,
-            paymentTilte.titleStandart
+            lang === "uk"
+              ? paymentTilte.titleStandart
+              : paymentTilteRu.titleStandart,
+            lang
           );
         }
+
         setTimeout(async () => {
-          await bot.editMessageText(text.priceDays, {
-            chat_id,
-            message_id: message_id,
-            reply_markup: { ...pay_btn() },
-          });
+          await bot.editMessageText(
+            lang === "uk" ? text.priceDays : textRu.priceDays,
+            {
+              chat_id,
+              message_id: message_id,
+              reply_markup:
+                lang === "uk" ? { ...pay_btn() } : { ...pay_btnRu() },
+            }
+          );
         }, 500);
       } else {
         setTimeout(async () => {
-          await bot.editMessageText(text.priceDays, {
-            chat_id,
-            message_id: message_id,
-            reply_markup: { ...btnIsPayment() },
-          });
+          await bot.editMessageText(
+            lang === "uk" ? text.priceDays : textRu.priceDays,
+            {
+              chat_id,
+              message_id: message_id,
+              reply_markup:
+                lang === "uk" ? { ...btnIsPayment() } : { ...btnIsPaymentRu() },
+            }
+          );
         }, 500);
       }
     }
@@ -144,7 +183,8 @@ bot.on("callback_query", async (query) => {
 
       requestData.request.amount = 15000;
       requestData.request.order_id = generateId;
-      requestData.request.order_desc = paymentTilte.titleVIP;
+      requestData.request.order_desc =
+        lang === "uk" ? paymentTilte.titleVIP : paymentTilteRu.titleVIP;
       requestData.request.signature = createShaPost();
 
       await reqFondy().then((res) => {
@@ -152,7 +192,6 @@ bot.on("callback_query", async (query) => {
         paymentInfo.pay_link = res.response.checkout_url;
       });
 
-      // createPay();
       addInfoUserDB(
         userId,
         userFirstName,
@@ -162,7 +201,8 @@ bot.on("callback_query", async (query) => {
         generateId,
         paymentInfo.pay_id,
         requestData.request.amount,
-        paymentTilte.titleVIP
+        lang === "uk" ? paymentTilte.titleVIP : paymentTilteRu.titleVIP,
+        lang
       );
 
       resData.request.order_id = generateId;
@@ -178,41 +218,50 @@ bot.on("callback_query", async (query) => {
             nameBtn,
             generateId,
             paymentInfo.pay_id,
-            paymentTilte.titleVIP
+            lang === "uk" ? paymentTilte.titleVIP : paymentTilteRu.titleVIP,
+            lang
           );
         }
         setTimeout(async () => {
-          await bot.editMessageText(text.priceVip, {
-            chat_id,
-            message_id: message_id,
-            reply_markup: { ...pay_btn() },
-          });
+          await bot.editMessageText(
+            lang === "uk" ? text.priceVip : textRu.priceVip,
+            {
+              chat_id,
+              message_id: message_id,
+              reply_markup: { ...pay_btn() },
+            }
+          );
         }, 500);
       } else {
         setTimeout(async () => {
-          await bot.editMessageText(text.priceVip, {
-            chat_id,
-            message_id: message_id,
-            reply_markup: { ...btnIsPayment() },
-          });
+          await bot.editMessageText(
+            lang === "uk" ? text.priceVip : textRu.priceVip,
+            {
+              chat_id,
+              message_id: message_id,
+              reply_markup: { ...btnIsPayment() },
+            }
+          );
         }, 500);
       }
     }
 
     if (nameBtn === "back") {
       await bot.answerCallbackQuery(id);
-      bot.editMessageText(text.choice, {
+      bot.editMessageText(lang === "uk" ? text.choice : textRu.choice, {
         chat_id,
         message_id: message_id,
-        reply_markup: keyboardDefaultReplay,
+        reply_markup:
+          lang === "uk" ? keyboardDefaultReplay : keyboardDefaultReplayRu,
       });
     }
     if (nameBtn === "btn_5") {
       await bot.answerCallbackQuery(id);
-      bot.editMessageText(text.choice, {
+      bot.editMessageText(lang === "uk" ? text.choice : textRu.choice, {
         chat_id,
         message_id: message_id,
-        reply_markup: keyboardDefaultReplay,
+        reply_markup:
+          lang === "uk" ? keyboardDefaultReplay : keyboardDefaultReplayRu,
       });
     }
     if (nameBtn === "cancelP") {
@@ -228,7 +277,12 @@ bot.on("callback_query", async (query) => {
     if (nameBtn === "cancelSP") {
       await bot.answerCallbackQuery(id);
       deletePayUser(userId);
-      bot.sendMessage(chat_id, btnText.acceptCencelPayment);
+      bot.sendMessage(
+        chat_id,
+        lang === "uk"
+          ? btnText.acceptCencelPayment
+          : btnTextRu.acceptCencelPayment
+      );
     }
   } catch (error) {
     console.error(error);
@@ -237,30 +291,62 @@ bot.on("callback_query", async (query) => {
 
 bot.on("message", async (msg) => {
   try {
+    lang = msg.from.language_code;
+
     const msgText = msg.text;
     const chatId = msg.chat.id;
+
+    updateUserLang(chatId, lang);
 
     const user = await getOneUserById(chatId);
 
     switch (msgText) {
-      case btnText.tariff:
-        bot.sendMessage(chatId, text.choice, { ...keyboardDefault });
+      case lang === "uk" ? btnText.tariff : btnTextRu.tariff:
+        bot.sendMessage(
+          chatId,
+          lang === "uk" ? text.choice : textRu.choice,
+          lang === "uk"
+            ? {
+                ...keyboardDefault,
+              }
+            : {
+                ...keyboardDefaultRu,
+              }
+        );
         break;
-      case btnText.mySubscription:
+      case lang === "uk" ? btnText.mySubscription : btnTextRu.mySubscription:
         if (!user[0]?.payment.order_id) {
-          bot.sendMessage(chatId, text.mySubscription, { ...subscription });
+          bot.sendMessage(
+            chatId,
+            lang === "uk" ? text.mySubscription : textRu.mySubscription,
+            lang === "uk" ? { ...subscription } : { ...subscriptionRu }
+          );
         } else {
-          bot.sendMessage(chatId, acceptedMySubscription(user), {
-            ...cancelPayment,
-          });
+          bot.sendMessage(
+            chatId,
+            acceptedMySubscription(user),
+            lang === "uk"
+              ? {
+                  ...cancelPayment,
+                }
+              : {
+                  ...cancelPaymentRu,
+                }
+          );
         }
 
         break;
-      case btnText.clubRules:
-        bot.sendMessage(chatId, text.clubRules);
+      case lang === "uk" ? btnText.clubRules : btnTextRu.clubRules:
+        bot.sendMessage(
+          chatId,
+          lang === "uk" ? text.clubRules : textRu.clubRules
+        );
         break;
-      case btnText.descriptionClub:
-        bot.sendMessage(chatId, text.descriptionClub);
+      case lang === "uk" ? btnText.descriptionClub : btnTextRu.descriptionClub:
+        bot.sendMessage(
+          chatId,
+          lang === "uk" ? text.descriptionClub : textRu.descriptionClub
+        );
         break;
       default:
         break;
@@ -283,19 +369,31 @@ setInterval(async () => {
         user.order_desc,
         user.payment.amount
       );
+
       recurringData.request.signature = createShaRecurring();
-      const errorMessage = () => bot.sendMessage(user.user_id, text.errorRePay);
+      const errorMessage = () =>
+        bot.sendMessage(
+          user.user_id,
+          user.lang === "uk" ? text.errorRePay : textRu.errorRePay
+        );
       recurringPay().then((res) => {
-        if (res.response.order_status === "declined") {
+        if (
+          res.response.order_status === "declined" ||
+          res.response.order_status === "processing"
+        ) {
           return errorMessage();
         }
         if (res.response.error_code) {
           return errorMessage();
         } else {
           recurringPayResponseDB(res.response, user.user_id, errorMessage);
-          return bot.sendMessage(user.user_id, "Підписка була продовжена!🫡 🎉");
+          return bot.sendMessage(
+            user.user_id,
+            user.lang === "uk" ? text.goodSub : textRu.goodSub
+          );
         }
       });
     }
   });
-}, 10800000);
+}, 10000);
+// 10800000
