@@ -39,7 +39,7 @@ const server = () => {
   app.all("/good", async (req, res) => {
     const response = await req.body;
 
-    res.redirect("https://t.me/+3A3_8ANA8FthNGMy");
+    res.redirect(process.env.URL_GROOP_CONNECT);
     // res.status(200).send("HTTP 200 OK");
 
     res.end();
